@@ -36,7 +36,7 @@ minter_mode = 1  # 0 - your chain
 bridger_mode = 1  # 0 - your chain
 
 
-# bsc, avax, polygon, opti, mantle
+# bsc, avax, polygon, opti, mantle, base
 
 chain = ''
 
@@ -52,5 +52,6 @@ rpcs = {'bsc': 'https://bscrpc.com',
         'polygon': 'https://rpc.ankr.com/polygon',
         'avax': 'https://rpc.ankr.com/avalanche',
         'opti': 'https://rpc.ankr.com/optimism',
-        'mantle': 'https://rpc.mantle.xyz'
+        'mantle': 'https://rpc.mantle.xyz',
+        'base': 'https://1rpc.io/base'
         }

@@ -1,6 +1,6 @@
 <h1 align="center">Holograph Minter&Bridger</h1>
 
-<h2>О боте</h2>
+## О боте
 Минтит любые нфт на https://app.holograph.xyz/</br>
 - заходим в конфиг и ЧИТАЕМ ИНСТРУКЦИЮ
 
@@ -8,7 +8,22 @@
 
 * Также не забудьте установить зависимости 
 
-<pre><code> pip install -r requirements.txt</code></pre>
+### Install venv
+```sh
+python3 -m venv ./venv
+```
+### Activate venv
+|Оболонка  | Команда для активації віртуального середовища
+|-----------|-----------------------------------------------|
+| bash/zsh  | `$ source <venv>/bin/activate`                |
+| fish      | `$ source <venv>/bin/activate.fish`           |
+| csh/tcsh  | `$ source <venv>/bin/activate.csh`            |
+| cmd.exe   | `C:\> <venv>\Scripts\activate.bat`            |
+| PowerShell| `PS C:\> <venv>\Scripts\Activate.ps1`         |
+### Install deps
+```sh
+pip install -r requirements.txt
+```
 
 После запуска можно проверить эксель таблицу с результами
 

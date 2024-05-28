@@ -47,7 +47,7 @@ class Minter(Help):
         self.address = ''
 
     def balance(self):
-        chainss = ['avax', 'polygon', 'bsc', 'opti', 'mantle']
+        chainss = ['avax', 'polygon', 'bsc', 'opti', 'mantle', 'base']
         random.shuffle(chainss)
         for i in chainss:
             w3 = Web3(Web3.HTTPProvider(rpcs[i]))
@@ -89,7 +89,7 @@ class Minter(Help):
             })
             gas = self.w3.eth.gas_price
             tx['maxFeePerGas'], tx['maxPriorityFeePerGas'] = gas, gas
-            if self.chain in ('bsc', 'mantle'):
+            if self.chain in ('bsc', 'mantle', 'base'):
                 del tx['maxFeePerGas']
                 del tx['maxPriorityFeePerGas']
                 tx['gasPrice'] = self.w3.eth.gas_price
@@ -129,14 +129,15 @@ class Bridger(Help):
         self.delay = random.randint(delay[0], delay[1])
         self.moralisapi = api
         self.HolographBridgeAddress = Web3.to_checksum_address('0xD85b5E176A30EdD1915D6728FaeBD25669b60d8b')
-        self.LzEndAddress = Web3.to_checksum_address('0x3c2269811836af69497E5F486A85D7316753cf62' if self.chain != 'mantle' else '0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7')
+        self.LzEndAddress = Web3.to_checksum_address('0x3c2269811836af69497E5F486A85D7316753cf62' if self.chain not in ['mantle', 'base'] else '0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7')
         self.nft_address = Web3.to_checksum_address(CONTRACT)
 
     def check_nft(self):
         if self.mode == 0 and self.chain not in ['opti', 'mantle']:
             cc = {'avax': 'avalanche',
                   'polygon': 'polygon',
-                  'bsc': 'bsc'}
+                  'bsc': 'bsc',
+                  'base': 'base'}
             api_key = self.moralisapi
             params = {
                 "chain": cc[self.chain],
@@ -191,7 +192,7 @@ class Bridger(Help):
                 time.sleep(1)
 
         elif self.mode == 1:
-            for chain in ['avalanche', 'polygon', 'bsc']:
+            for chain in ['avalanche', 'polygon', 'bsc', 'base']:
 
                 api_key = self.moralisapi
                 params = {
@@ -276,7 +277,7 @@ class Bridger(Help):
                 self.account = self.w3.eth.account.from_key(self.privatekey)
                 self.address = self.account.address
                 if chain == self.to:
-                    chains = ['avax', 'polygon', 'bsc']
+                    chains = ['avax', 'polygon', 'bsc', 'base']
                     chains.remove(self.to)
                     self.to = random.choice(chains)
             else:
