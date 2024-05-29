@@ -23,9 +23,9 @@ rpcs - Небольшая рекомендация для тех кто буде
 
 """
 
-NAME = 'WDWGF'
+NAME = 'GLOW'
 
-CONTRACT = '0xcB0Bb5D835A47584fdA53F57bb4193B28d2738dB'
+CONTRACT = "0x1810e6D63Fe389b2580133c8DA17944D3bAb5E6F"
 
 count = 1  # либо [от, до]
 
@@ -42,16 +42,16 @@ chain = ''
 
 to_chain = ''  # ['your chain', 'your chain'...] #бридж только в bsc, avax, polygon !!! из bsc, avax, polygon, opti
 
-shuffle = 1
+shuffle = 0
 
 delay = (0, 100)
 
 moralis_api = ''
 
 rpcs = {'bsc': 'https://bscrpc.com',
-        'polygon': 'https://rpc.ankr.com/polygon',
+        'polygon': 'https://polygon.meowrpc.com',
         'avax': 'https://rpc.ankr.com/avalanche',
         'opti': 'https://rpc.ankr.com/optimism',
         'mantle': 'https://rpc.mantle.xyz',
-        'base': 'https://1rpc.io/base'
+        'base': 'https://base.llamarpc.com'
         }
