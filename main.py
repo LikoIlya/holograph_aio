@@ -9,14 +9,14 @@ from config import minter_mode, bridger_mode, NAME
 
 
 
-def write_to_csv(key, address, result):
+def write_to_csv(key, address, result, tx_hash=None):
     with open('result.csv', 'a', newline='') as file:
         writer = csv.writer(file)
 
         if file.tell() == 0:
-            writer.writerow(['key', 'address', 'result'])
+            writer.writerow(['key', 'address', 'result', 'tx_hash'])
 
-        writer.writerow([key, address, result])
+        writer.writerow([key, address, result, tx_hash])
 
 def main():
     print(f'\n{" " * 32}автор - https://t.me/iliocka, [base >^< forked]{" " * 32}\n')

@@ -30,18 +30,19 @@ class Help:
         start_time = int(time.time())
         while True:
             current_time = int(time.time())
-            if current_time >= start_time + 100:
-                logger.info(
-                    f"{self.address} - транзакция не подтвердилась за 100 cекунд, начинаю повторную отправку..."
-                )
-                return 0
             try:
                 status = self.w3.eth.get_transaction_receipt(tx_hash)["status"]
                 if status == 1:
                     return status
+            except Exception as error: pass
+            if current_time >= start_time + 180:
+                logger.info(
+                    f"{self.address} - транзакция не подтвердилась за 100 cекунд, начинаю повторную отправку..."
+                )
+                return 0
+            else: 
                 time.sleep(1)
-            except Exception as error:
-                time.sleep(1)
+                
 
     def sleep_indicator(self, sec):
         for i in tqdm(
@@ -92,7 +93,7 @@ class Minter(Help):
             if chain:
                 self.chain = chain
             else:
-                return self.privatekey, self.address, "error"
+                return self.privatekey, self.address, "error", None
 
         self.w3 = Web3(Web3.HTTPProvider(rpcs[self.chain]))
         self.account = self.w3.eth.account.from_key(self.privatekey)
@@ -125,7 +126,7 @@ class Minter(Help):
                     f"{self.address}:{self.chain} - успешно заминтил {self.count} {NAME} {scans[self.chain]}{self.w3.to_hex(hash_)}..."
                 )
                 self.sleep_indicator(self.delay)
-                return self.privatekey, self.address, "success"
+                return self.privatekey, self.address, "success", (scans[self.chain] + self.w3.to_hex(hash_))
             else:
                 return self.mint()
         except Exception as e:
@@ -134,13 +135,16 @@ class Minter(Help):
                 logger.error(
                     f"{self.address}:{self.chain} - нет баланса нативного токена"
                 )
-                return self.privatekey, self.address, "error"
+                return self.privatekey, self.address, "error", None
             elif "nonce too low" in error or "already known" in error:
+                logger.info(f"{self.address}:{self.chain} - пробую еще раз...")
+                return self.mint()
+            elif "replacement transaction underpriced" in error:
                 logger.info(f"{self.address}:{self.chain} - пробую еще раз...")
                 return self.mint()
             else:
                 logger.error(f"{self.address}:{self.chain}  - {e}")
-                return self.privatekey, self.address, "error"
+                return self.privatekey, self.address, "error", None
 
 
 class Bridger(Help):
@@ -305,7 +309,7 @@ class Bridger(Help):
             if data:
                 nft_id = data
             else:
-                return self.privatekey, self.address, f"{NAME} nft not in wallet"
+                return self.privatekey, self.address, f"{NAME} nft not in wallet", None
 
         elif self.mode == 1:
             self.w3 = Web3(Web3.HTTPProvider(rpcs["bsc"]))
@@ -324,7 +328,7 @@ class Bridger(Help):
                     chains.remove(self.to)
                     self.to = random.choice(chains)
             else:
-                return self.privatekey, self.address, f"{NAME} nft not in wallet"
+                return self.privatekey, self.address, f"{NAME} nft not in wallet", None
 
         payload = to_hex(
             encode(
@@ -338,12 +342,15 @@ class Bridger(Help):
         holograph = self.w3.eth.contract(
             address=self.HolographBridgeAddress, abi=holo_abi
         )
+        # msgFee = holograph.functions.getMessageFee(to, gas_price, gas_lim, payload).call()
+        # print(msgFee)
+        # return
         lzEndpoint = self.w3.eth.contract(address=self.LzEndAddress, abi=lzEndpointABI)
 
         lzFee = lzEndpoint.functions.estimateFees(
             Lz_ids[self.to], self.HolographBridgeAddress, "0x", False, "0x"
         ).call()[0]
-        lzFee = int(lzFee * 3.5)
+        lzFee = int(lzFee * 1.5)
 
         print(lzFee / 10**18)
         while True:
@@ -367,11 +374,11 @@ class Bridger(Help):
                                     ),
                                 }
                             )
-                            * 1.2
+                            * 1.05
                         ),
                         "nonce": self.w3.eth.get_transaction_count(self.address),
                         "maxFeePerGas": int(self.w3.eth.gas_price * 1.2),
-                        "maxPriorityFeePerGas": int(self.w3.eth.gas_price * 0.8),
+                        "maxPriorityFeePerGas": int(self.w3.eth.gas_price * 1.03),
                     }
                 )
                 if self.chain == "bsc":
@@ -386,17 +393,20 @@ class Bridger(Help):
                         f"{self.address}:{self.chain} - successfully bridged {NAME} {nft_id} to {self.to} : {self.scan}{self.w3.to_hex(hash_)}..."
                     )
                     self.sleep_indicator(self.delay)
-                    return self.privatekey, self.address, "success"
+                    return self.privatekey, self.address, "success", (self.scan + self.w3.to_hex(hash_))
             except Exception as e:
                 error = str(e)
                 if "insufficient funds for gas * price + value" in error:
                     logger.error(
                         f"{self.address}:{self.chain} - нет баланса нативного токена"
                     )
-                    return self.privatekey, self.address, "error"
+                    return self.privatekey, self.address, "error", None
                 elif "nonce too low" in error or "already known" in error:
+                    logger.info(f"{self.address}:{self.chain} - пробую еще раз...")
+                    self.bridge()
+                elif "replacement transaction underpriced" in error:
                     logger.info(f"{self.address}:{self.chain} - пробую еще раз...")
                     self.bridge()
                 else:
                     logger.error(f"{self.address}:{self.chain}  - {e}")
-                    return self.privatekey, self.address, "error"
+                    return self.privatekey, self.address, "error", None
